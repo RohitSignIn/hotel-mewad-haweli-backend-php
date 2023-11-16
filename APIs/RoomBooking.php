@@ -1,6 +1,33 @@
 <?php 
-include("../config/db.php");
+require_once("../config/db.php");
 
+
+// Fetching Booked Rooms
+if ($_SERVER["REQUEST_METHOD"] == "GET") {
+    try{
+        // Fetch by id if pass
+        $sql = isset($_GET["id"]) ? "SELECT * FROM booked_rooms where id = ".$_GET['id'] : "SELECT * FROM booked_rooms";
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+        $result = $sth->fetchAll();
+        
+        header('Content-type: application/json');
+            http_response_code(200);
+            echo json_encode([
+                'message' => "fetched successfully",
+                'data' => $result
+            ]);
+
+        }catch(Exception $e){
+            // Response if created successfully
+            header('Content-type: application/json');
+            http_response_code(500);
+            echo json_encode([
+                'message' => $e,
+            ]);
+        }
+    }
 
 // Create Room Booking
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
