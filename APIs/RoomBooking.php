@@ -70,31 +70,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-// Delete Booked Room 
+// Delete Booked Room - Support JSON DATA ONLY
 if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
     try{
-
-        $name = $_POST["name"];
-        
-        if($name && $mobile && $email && $booked_str){
-            $data = [
-                'name' => $name,
-                'mobile' => $mobile,
-                'email' => $email,
-                'booked_str' => $booked_str,
-            ];
-                
-                $sql = "INSERT INTO booked_rooms (name, mobile, email, booked_str) VALUES (:name, :mobile, :email, :booked_str)";
-                $pdo->prepare($sql)->execute($data);
+        // Using file_get_contents and json_decode
+        $rawData = file_get_contents("php://input");
+        $deleteData = json_decode($rawData, true);
+        if(isset($deleteData['id'])){
+            $id = $deleteData['id'];
+                $sql = "DELETE FROM booked_rooms WHERE id = ".$id;
+                $pdo->prepare($sql)->execute();
                 
                 // Response if created successfully
                 header('Content-type: application/json');
-                http_response_code(201);
+                http_response_code(202);
                 echo json_encode([
-                    'message' => 'Successfully Created',
+                    'message' => 'Successfully Deleted',
+                    'data' => array('id' => $id) 
                 ]);
         }else{
-            throw new Exception("Invalid Data, All fields are required");
+            throw new Exception("Invalid Data, Id not found");
         }
         }catch(Exception $e){
             // Response if created successfully
